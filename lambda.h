@@ -8,20 +8,20 @@
 #ifndef LAMBDA_H_
 #define LAMBDA_H_
 
+#include "atom.h"
 #include "statement.h"
 #include <vector>
 #include <map>
 #include <string>
 
 
-class Lambda
+class Lambda: public AtomicExpression
 {
-	bool valid;
 	std::vector<std::string> signature;
 	Statement body;
 
 public:
-	Lambda() {}
+	Lambda(): AtomicExpression(ATOM_LAMBDA) {}
 	Lambda(const char*&);
 
 	std::vector<std::string>::const_iterator getSignatureIterator() const { return signature.begin(); }

@@ -8,8 +8,8 @@
 #include "exprtree.h"
 #include "bintree.cpp"
 #include "lstack.cpp"
-#include "token.h"
 #include "arithmetic.h"
+#include "token.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -26,7 +26,7 @@ void ExpressionTree::deleteNode(ExpressionTreeNode* node)
 	}
 }
 
-AtomicExpressionToken& ExpressionTreeIterator::operator*()
+Token& ExpressionTreeIterator::operator*()
 {
 	return *ptr->data;
 }
@@ -36,13 +36,13 @@ ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
 	if (src == NULL)
 		return NULL;
 
-	return new ExpressionTreeNode(new AtomicExpressionToken(*src->data), copyNode(src->left), copyNode(src->right));
+	return new ExpressionTreeNode(new Token(*src->data), copyNode(src->left), copyNode(src->right));
 }
 
-ExpressionTree::ExpressionTree(const AtomicExpressionToken& data): BinaryTree<AtomicExpressionToken*>(new AtomicExpressionToken(data)) {}
+ExpressionTree::ExpressionTree(const Token& data): BinaryTree<Token*>(new Token(data)) {}
 
-ExpressionTree::ExpressionTree(const AtomicExpressionToken& data, ExpressionTree& left, ExpressionTree& right):
-		BinaryTree<AtomicExpressionToken*>(new AtomicExpressionToken(data), left, right) {}
+ExpressionTree::ExpressionTree(const Token& data, ExpressionTree& left, ExpressionTree& right):
+		BinaryTree<Token*>(new Token(data), left, right) {}
 
 ExpressionTree::ExpressionTree(const ExpressionTree& other)
 {
@@ -69,7 +69,7 @@ void createTree(LinkedStack<ExpressionTree>& rstack, char op)
 {
 	ExpressionTree rtree = rstack.pop();
 	ExpressionTree ltree = rstack.pop();
-	rstack.push(ExpressionTree(AtomicExpressionToken(op), ltree, rtree));
+	rstack.push(ExpressionTree(Token(op), ltree, rtree));
 }
 
 ExpressionTree createExpressionTree(char const*& expr)
@@ -83,11 +83,11 @@ ExpressionTree createExpressionTree(char const*& expr)
 	while (*expr && *expr != ';')
     {
 		if (*expr >= '0' && *expr <= '9' || *expr == '-' && expr + 1 && *(expr + 1) >= '0' && *(expr + 1) <= '9')
-			rstack.push(ExpressionTree(AtomicExpressionToken(expr, ATOM_INTEGER)));
+			rstack.push(ExpressionTree(Token(expr, ATOM_INTEGER)));
 		else if (*expr == '"')
-			rstack.push(ExpressionTree(AtomicExpressionToken(expr, ATOM_STRING)));
+			rstack.push(ExpressionTree(Token(expr, ATOM_STRING)));
 		else if (*expr == '\\')
-			rstack.push(ExpressionTree(AtomicExpressionToken(expr, ATOM_LAMBDA)));
+			rstack.push(ExpressionTree(Token(expr, ATOM_LAMBDA)));
 		else if (*expr == '(')
 			opstack.push(*expr);
 		else if (*expr == ')')
