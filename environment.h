@@ -10,6 +10,7 @@
 
 #include <map>
 #include <stack>
+#include "frame.h"
 #include "statement.h"
 
 

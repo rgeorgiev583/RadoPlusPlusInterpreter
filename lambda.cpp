@@ -6,20 +6,21 @@
  */
 
 #include "lambda.h"
-#include "string.h"
+
+#include "strtok.h"
 
 
-Lambda::Lambda(const char*& code): AtomicExpression(ATOM_LAMBDA)
+Lambda::Lambda(const char*& code): Value(VALUE_LAMBDA)
 {
 	if (getToken(code, "( \t\n\r") != "\\")
 	{
-		type = ATOM_INVALID;
+		type = VALUE_INVALID;
 		return;
 	}
 
 	if (getToken(code, ", \t\n\r")[0] != '(')
 	{
-		type = ATOM_INVALID;
+		type = VALUE_INVALID;
 		return;
 	}
 
@@ -37,6 +38,6 @@ Lambda::Lambda(const char*& code): AtomicExpression(ATOM_LAMBDA)
 			signature.push_back(last_param);
 	}
 
-	body = Statement(code);
+	body = Statement::createStatement(code);
 }
 

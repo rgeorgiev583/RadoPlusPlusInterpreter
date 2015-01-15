@@ -8,26 +8,26 @@
 #ifndef LAMBDA_H_
 #define LAMBDA_H_
 
-#include "atom.h"
+#include "value.h"
 #include "statement.h"
 #include <vector>
 #include <map>
 #include <string>
 
 
-class Lambda: public AtomicExpression
+class Lambda: public Value
 {
 	std::vector<std::string> signature;
-	Statement body;
+	Statement* body;
 
 public:
-	Lambda(): AtomicExpression(ATOM_LAMBDA) {}
+	Lambda(): Value(VALUE_LAMBDA) {}
 	Lambda(const char*&);
 
 	Lambda* clone() const { return new Lambda(*this); }
 
 	std::vector<std::string>::const_iterator getSignatureIterator() const { return signature.begin(); }
-	const Statement& getBody() const { return body; }
+	const Statement* getBody() const { return body; }
 };
 
 
