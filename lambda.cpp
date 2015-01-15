@@ -9,17 +9,17 @@
 #include "string.h"
 
 
-Lambda::Lambda(const char*& code)
+Lambda::Lambda(const char*& code): AtomicExpression(ATOM_LAMBDA)
 {
 	if (getToken(code, "( \t\n\r") != "\\")
 	{
-		valid = false;
+		type = ATOM_INVALID;
 		return;
 	}
 
 	if (getToken(code, ", \t\n\r")[0] != '(')
 	{
-		valid = false;
+		type = ATOM_INVALID;
 		return;
 	}
 
@@ -38,6 +38,5 @@ Lambda::Lambda(const char*& code)
 	}
 
 	body = Statement(code);
-	valid = true;
 }
 

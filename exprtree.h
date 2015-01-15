@@ -13,28 +13,28 @@
 #include "atomtype.h"
 
 
-class AtomicExpressionToken;
+class Token;
 class AtomicExpression;
 
-typedef TreeNode<AtomicExpressionToken*> ExpressionTreeNode;
+typedef TreeNode<Token*> ExpressionTreeNode;
 
-class ExpressionTreeIterator: public BinaryTreeIterator<AtomicExpressionToken*>
+class ExpressionTreeIterator: public BinaryTreeIterator<Token*>
 {
 public:
-	ExpressionTreeIterator(ExpressionTreeNode* _ptr = NULL): BinaryTreeIterator<AtomicExpressionToken*>(_ptr) {}
+	ExpressionTreeIterator(ExpressionTreeNode* _ptr = NULL): BinaryTreeIterator<Token*>(_ptr) {}
 
-	AtomicExpressionToken& operator*();
+	Token& operator*();
 };
 
-class ExpressionTree: public BinaryTree<AtomicExpressionToken*>
+class ExpressionTree: public BinaryTree<Token*>
 {
 	void deleteNode(ExpressionTreeNode* node);
 	ExpressionTreeNode* copyNode(ExpressionTreeNode* src);
 
 public:
-	ExpressionTree(): BinaryTree<AtomicExpressionToken*>() {}
-	ExpressionTree(const AtomicExpressionToken&);
-	ExpressionTree(const AtomicExpressionToken&, ExpressionTree&, ExpressionTree&);
+	ExpressionTree(): BinaryTree<Token*>() {}
+	ExpressionTree(const Token&);
+	ExpressionTree(const Token&, ExpressionTree&, ExpressionTree&);
 	ExpressionTree(const ExpressionTree&);
 	ExpressionTree& operator=(const ExpressionTree&);
 	~ExpressionTree();

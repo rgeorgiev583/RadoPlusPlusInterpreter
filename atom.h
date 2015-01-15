@@ -8,29 +8,20 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
-#include "lambda.h"
 #include "atomtype.h"
+#include "token.h"
 #include <string>
 
 
-class AtomicExpression
+class AtomicExpression: public Token
 {
+protected:
 	ATOM_TYPE type;
-	int integer;
-	std::string str;
-	Lambda lambda;
 
 public:
-    AtomicExpression(): type(ATOM_INVALID) {}
-    AtomicExpression(int _integer): type(ATOM_INTEGER), integer(_integer) {}
-    AtomicExpression(const std::string& _str): type(ATOM_STRING), str(_str) {}
-    AtomicExpression(const Lambda& _lambda): type(ATOM_LAMBDA), lambda(_lambda) {}
-    AtomicExpression(const char*&, ATOM_TYPE);
+    AtomicExpression(ATOM_TYPE _type = ATOM_INVALID): Token(TOKEN_VALUE), type(_type) {}
 
     ATOM_TYPE getType() const { return type; }
-    int getInteger() const { return integer; }
-    const std::string& getString() const { return str; }
-    const Lambda& getLambda() const { return lambda; }
 };
 
 
