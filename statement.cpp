@@ -6,37 +6,29 @@
  */
 
 #include "statement.h"
-#include "string.h"
+#include "compound.h"
+#include "simple.h"
+#include "strtok.h"
+#include "exprtree.h"
 #include <string>
 #include <cstring>
 
 
-Statement::Statement(const char*& code)
+Statement* Statement::createStatement(const char*& code)
 {
-	std::string lhs_expr = getToken(code, "= \t\n\r");
+	Statement* statement;
 
-	if (lhs_expr == "return")
-		type = STATEMENT_RETURN;
-	else if (lhs_expr == "print")
-		type = STATEMENT_OUTPUT;
-	else if (lhs_expr == "input")
-		type = STATEMENT_INPUT;
-	else if (lhs_expr[0] == '{')
+	if (getToken(code, " \t\n\r")[0] == '{')
 	{
-		type = STATEMENT_COMPOUND;
-		code++;
-		std::string token;
-
-		while (token = getToken(code, ";"), !token.empty() && token.find('}') == std::string::npos)
-			body.push_back(Statement(code));
+		statement = new CompoundStatement(code);
+		statement->type = STATEMENT_COMPOUND;
 	}
 	else
 	{
-		type = STATEMENT_ASSIGNMENT;
-		code = strchr(code, '=');
-		code++;
+		statement = new SimpleStatement(code);
+		statement->type = STATEMENT_SIMPLE;
 	}
 
-	rhs = createExpressionTree(code);
+	return statement;
 }
 

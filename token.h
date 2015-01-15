@@ -25,6 +25,8 @@ class Token: public Cloneable
 public:
 	Token(TOKEN_TYPE _type = TOKEN_INVALID): type(_type) {}
 
+	virtual Token* clone() const = 0;
+
 	TOKEN_TYPE getType() const { return type; }
 };
 

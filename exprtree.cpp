@@ -11,67 +11,22 @@
 #include "arithmetic.h"
 #include "token.h"
 #include "operator.h"
-#include "int-atom.h"
-#include "string-atom.h"
 #include "lambda.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include "integer.h"
+#include "string.h"
 
 
-void ExpressionTree::deleteNode(ExpressionTreeNode* node)
-{
-	if (node != NULL)
-	{
-		delete node->data;
-		deleteNode(node->left);
-		deleteNode(node->right);
-		delete node;
-	}
-}
-
-
-ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
-{
-	if (src == NULL)
-		return NULL;
-
-	return new ExpressionTreeNode((Token*) src->data->clone(), copyNode(src->left), copyNode(src->right));
-}
-
-ExpressionTree::ExpressionTree(const Token* data): BinaryTree<Token*>((Token*) data->clone()) {}
-
-ExpressionTree::ExpressionTree(const Token* data, ExpressionTree& left, ExpressionTree& right): BinaryTree<Token*>((Token*) data->clone(), left, right) {}
-
-ExpressionTree::ExpressionTree(const ExpressionTree& other)
-{
-	root = copyNode(other.root);
-}
-
-ExpressionTree& ExpressionTree::operator=(const ExpressionTree& other)
-{
-	if (&other != this)
-	{
-		deleteNode(root);
-		root = copyNode(other.root);
-	}
-
-	return *this;
-}
-
-ExpressionTree::~ExpressionTree()
-{
-	deleteNode(root);
-}
-
-void createTree(LinkedStack<ExpressionTree>& rstack, char op)
+void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
 {
 	ExpressionTree rtree = rstack.pop();
 	ExpressionTree ltree = rstack.pop();
 	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
 }
 
-ExpressionTree createExpressionTree(char const*& expr)
+ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
 {
 	LinkedStack<char> opstack;
 	LinkedStack<ExpressionTree> rstack;
@@ -119,6 +74,52 @@ ExpressionTree createExpressionTree(char const*& expr)
 
 	return rstack.pop();
 }
+
+void ExpressionTree::deleteNode(ExpressionTreeNode* node)
+{
+	if (node != NULL)
+	{
+		delete node->data;
+		deleteNode(node->left);
+		deleteNode(node->right);
+		delete node;
+	}
+}
+
+
+ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
+{
+	if (src == NULL)
+		return NULL;
+
+	return new ExpressionTreeNode(src->data->clone(), copyNode(src->left), copyNode(src->right));
+}
+
+ExpressionTree::ExpressionTree(const Token* data): BinaryTree<Token*>(data->clone()) {}
+
+ExpressionTree::ExpressionTree(const Token* data, ExpressionTree& left, ExpressionTree& right): BinaryTree<Token*>(data->clone(), left, right) {}
+
+ExpressionTree::ExpressionTree(const ExpressionTree& other)
+{
+	root = copyNode(other.root);
+}
+
+ExpressionTree& ExpressionTree::operator=(const ExpressionTree& other)
+{
+	if (&other != this)
+	{
+		deleteNode(root);
+		root = copyNode(other.root);
+	}
+
+	return *this;
+}
+
+ExpressionTree::~ExpressionTree()
+{
+	deleteNode(root);
+}
+
 /*
 AtomicExpression evaluate(ExpressionTreeIterator it, ATOM_TYPE type)
 {
@@ -137,3 +138,4 @@ AtomicExpression evaluate(ExpressionTreeIterator it, ATOM_TYPE type)
         }
 }
 */
+

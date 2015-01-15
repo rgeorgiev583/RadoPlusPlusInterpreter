@@ -1,16 +1,16 @@
 /*
- * int-atom.cpp
+ * integer.cpp
  *
  *  Created on: Jan 15, 2015
  *      Author: radoslav
  */
 
-#include "int-atom.h"
 #include <cstdlib>
 #include <cstring>
+#include "integer.h"
 
 
-Integer::Integer(const char *& code): AtomicExpression(ATOM_INTEGER)
+Integer::Integer(const char *& code): Value(VALUE_INTEGER)
 {
 	integer = atoi(code);
 	code++;

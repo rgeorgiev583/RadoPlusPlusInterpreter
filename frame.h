@@ -10,10 +10,10 @@
 
 #include "exprtree.h"
 #include "statement.h"
-#include "atom.h"
 #include <queue>
 #include <vector>
 #include <map>
+#include "value.h"
 
 
 class CallStackFrame

@@ -8,37 +8,29 @@
 #ifndef STATEMENT_H_
 #define STATEMENT_H_
 
-#include "exprtree.h"
-#include <vector>
+#include "value.h"
 
 
 enum STATEMENT_TYPE
 {
 	STATEMENT_INVALID,
-	STATEMENT_ASSIGNMENT,
-	STATEMENT_RETURN,
-	STATEMENT_OUTPUT,
-	STATEMENT_INPUT,
+	STATEMENT_SIMPLE,
 	STATEMENT_CONDITIONAL,
 	STATEMENT_COMPOUND
 };
 
-class Statement
+class Statement: public Value
 {
 	STATEMENT_TYPE type;
-	std::string lhs;
-	ExpressionTree rhs;
-	std::vector<Statement> body;
-	//Statement statement_condition_true, statement_condition_false;
 
 public:
-	Statement(): type(STATEMENT_INVALID) {}
-	Statement(ExpressionTree _rhs, STATEMENT_TYPE _type): type(_type), rhs(_rhs) {}
-	Statement(const char*&);
+	static Statement* createStatement(const char*&);
+
+	Statement(STATEMENT_TYPE _type = STATEMENT_INVALID): type(_type) {}
+
+	virtual Statement* clone() const = 0;
 
 	STATEMENT_TYPE getType() const { return type; }
-	const std::string& getLhs() const { return lhs; }
-	ExpressionTreeIterator getRhsIterator() const { return rhs.iterator(); }
 };
 
 
