@@ -19,6 +19,8 @@ public:
 	String(const std::string& _str): AtomicExpression(ATOM_STRING), str(_str) {}
 	String(const char*&);
 
+	String* clone() const { return new String(*this); }
+
 	std::string getString() const { return str; }
 };
 

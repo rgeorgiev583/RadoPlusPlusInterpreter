@@ -8,6 +8,8 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include "cloneable.h"
+
 
 enum TOKEN_TYPE
 {
@@ -16,7 +18,7 @@ enum TOKEN_TYPE
     TOKEN_VALUE
 };
 
-class Token
+class Token: public Cloneable
 {
 	TOKEN_TYPE type;
 

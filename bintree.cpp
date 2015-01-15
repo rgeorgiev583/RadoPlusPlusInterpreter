@@ -33,7 +33,7 @@ class BinaryTreeIterator {
 	// if (it) ...
 	// if (!it) ...
 
-protected:
+private:
 	TreeNode<T>* ptr;
 	static T error;
 public:
