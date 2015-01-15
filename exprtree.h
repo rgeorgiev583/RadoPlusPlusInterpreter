@@ -10,21 +10,12 @@
 
 #include "bintree.cpp"
 #include "lstack.cpp"
-#include "atomtype.h"
+#include "atom.h"
+#include "token.h"
 
-
-class Token;
-class AtomicExpression;
 
 typedef TreeNode<Token*> ExpressionTreeNode;
-
-class ExpressionTreeIterator: public BinaryTreeIterator<Token*>
-{
-public:
-	ExpressionTreeIterator(ExpressionTreeNode* _ptr = NULL): BinaryTreeIterator<Token*>(_ptr) {}
-
-	Token& operator*();
-};
+typedef BinaryTreeIterator<Token*> ExpressionTreeIterator;
 
 class ExpressionTree: public BinaryTree<Token*>
 {
@@ -33,8 +24,8 @@ class ExpressionTree: public BinaryTree<Token*>
 
 public:
 	ExpressionTree(): BinaryTree<Token*>() {}
-	ExpressionTree(const Token&);
-	ExpressionTree(const Token&, ExpressionTree&, ExpressionTree&);
+	ExpressionTree(const Token*);
+	ExpressionTree(const Token*, ExpressionTree&, ExpressionTree&);
 	ExpressionTree(const ExpressionTree&);
 	ExpressionTree& operator=(const ExpressionTree&);
 	~ExpressionTree();
@@ -44,7 +35,7 @@ public:
 
 void createTree(LinkedStack<ExpressionTree>&, char);
 ExpressionTree createExpressionTree(char const*&);
-AtomicExpression evaluate(ExpressionTreeIterator, ATOM_TYPE);
+AtomicExpression* evaluate(ExpressionTreeIterator, ATOM_TYPE);
 
 
 #endif /* EXPRTREE_H_ */

@@ -19,6 +19,8 @@ public:
 	Integer(int _integer): AtomicExpression(ATOM_INTEGER), integer(_integer) {}
 	Integer(const char*&);
 
+	Integer* clone() const { return new Integer(*this); }
+
 	int getInteger() const { return integer; }
 };
 

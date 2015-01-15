@@ -24,6 +24,8 @@ public:
 	Lambda(): AtomicExpression(ATOM_LAMBDA) {}
 	Lambda(const char*&);
 
+	Lambda* clone() const { return new Lambda(*this); }
+
 	std::vector<std::string>::const_iterator getSignatureIterator() const { return signature.begin(); }
 	const Statement& getBody() const { return body; }
 };

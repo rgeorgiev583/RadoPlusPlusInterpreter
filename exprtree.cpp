@@ -10,6 +10,10 @@
 #include "lstack.cpp"
 #include "arithmetic.h"
 #include "token.h"
+#include "operator.h"
+#include "int-atom.h"
+#include "string-atom.h"
+#include "lambda.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -26,23 +30,18 @@ void ExpressionTree::deleteNode(ExpressionTreeNode* node)
 	}
 }
 
-Token& ExpressionTreeIterator::operator*()
-{
-	return *ptr->data;
-}
 
 ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
 {
 	if (src == NULL)
 		return NULL;
 
-	return new ExpressionTreeNode(new Token(*src->data), copyNode(src->left), copyNode(src->right));
+	return new ExpressionTreeNode((Token*) src->data->clone(), copyNode(src->left), copyNode(src->right));
 }
 
-ExpressionTree::ExpressionTree(const Token& data): BinaryTree<Token*>(new Token(data)) {}
+ExpressionTree::ExpressionTree(const Token* data): BinaryTree<Token*>((Token*) data->clone()) {}
 
-ExpressionTree::ExpressionTree(const Token& data, ExpressionTree& left, ExpressionTree& right):
-		BinaryTree<Token*>(new Token(data), left, right) {}
+ExpressionTree::ExpressionTree(const Token* data, ExpressionTree& left, ExpressionTree& right): BinaryTree<Token*>((Token*) data->clone(), left, right) {}
 
 ExpressionTree::ExpressionTree(const ExpressionTree& other)
 {
@@ -69,7 +68,7 @@ void createTree(LinkedStack<ExpressionTree>& rstack, char op)
 {
 	ExpressionTree rtree = rstack.pop();
 	ExpressionTree ltree = rstack.pop();
-	rstack.push(ExpressionTree(Token(op), ltree, rtree));
+	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
 }
 
 ExpressionTree createExpressionTree(char const*& expr)
@@ -83,11 +82,11 @@ ExpressionTree createExpressionTree(char const*& expr)
 	while (*expr && *expr != ';')
     {
 		if (*expr >= '0' && *expr <= '9' || *expr == '-' && expr + 1 && *(expr + 1) >= '0' && *(expr + 1) <= '9')
-			rstack.push(ExpressionTree(Token(expr, ATOM_INTEGER)));
+			rstack.push(ExpressionTree(new Integer(expr)));
 		else if (*expr == '"')
-			rstack.push(ExpressionTree(Token(expr, ATOM_STRING)));
+			rstack.push(ExpressionTree(new String(expr)));
 		else if (*expr == '\\')
-			rstack.push(ExpressionTree(Token(expr, ATOM_LAMBDA)));
+			rstack.push(ExpressionTree(new Lambda(expr)));
 		else if (*expr == '(')
 			opstack.push(*expr);
 		else if (*expr == ')')

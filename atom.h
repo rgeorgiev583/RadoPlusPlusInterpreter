@@ -8,10 +8,17 @@
 #ifndef ATOM_H_
 #define ATOM_H_
 
-#include "atomtype.h"
 #include "token.h"
 #include <string>
 
+
+enum ATOM_TYPE
+{
+	ATOM_INVALID,
+	ATOM_INTEGER,
+	ATOM_STRING,
+	ATOM_LAMBDA
+};
 
 class AtomicExpression: public Token
 {
