@@ -82,7 +82,7 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment
 	return NULL;
 }
 
-ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
+ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 {
 	LinkedStack<char> opstack;
 	LinkedStack<ExpressionTree> rstack;
@@ -90,7 +90,7 @@ ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
 	if (!expr)
 		return ExpressionTree();
 
-	while (*expr && *expr != ';' && *expr != ',')
+	while (*expr && *expr != ';' && *expr != ',' && *expr != ')')
     {
 		if (*expr >= '0' && *expr <= '9' || *expr == '-' && expr + 1 && *(expr + 1) >= '0' && *(expr + 1) <= '9')
 			rstack.push(ExpressionTree(new Integer(expr)));
@@ -104,33 +104,36 @@ ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
 			Identifier id(name);
 
 			if (!id.getName().empty())
-				rstack.push(ExpressionTree(getToken(name, " \t\n\r")[0] == '(' ? (Token*) new Call(expr) : (Token*) new Identifier(expr)));
+				rstack.push(ExpressionTree(gotoToken(name, " \t\n\r") && *name == '(' ? (Token*) new Call(expr) : (Token*) new Identifier(expr)));
 		}
-		else if (*expr == '(')
-			opstack.push(*expr);
-		else if (*expr == ')')
-        {
-			char op = opstack.pop();
+		else
+		{
+			if (*expr == '(')
+				opstack.push(*expr);
+			else if (*expr == ')')
+			{
+				char op = opstack.pop();
 
-			while (op != '(') {
-				createTree(rstack, op);
-				op = opstack.pop();
+				while (op != '(') {
+					createTree(rstack, op);
+					op = opstack.pop();
+				}
 			}
-		}
-        else if (*expr != ' ' && *expr != '\t' && *expr != '\n' && *expr != '\r')
-        {
-			// *expr е операция
-			// първо: вадим всички операции
-			// с по-висок или равен приоритет
-			while (!opstack.empty() &&
-				   priority(opstack.last()) >=
-				   priority(*expr))
-				createTree(rstack, opstack.pop());
+			else if (*expr != ' ' && *expr != '\t' && *expr != '\n' && *expr != '\r')
+			{
+				// *expr е операция
+				// първо: вадим всички операции
+				// с по-висок или равен приоритет
+				while (!opstack.empty() &&
+					   priority(opstack.last()) >=
+					   priority(*expr))
+					createTree(rstack, opstack.pop());
 
-			opstack.push(*expr);
-		}
+				opstack.push(*expr);
+			}
 
-		expr++;
+			expr++;
+		}
 	}
 
 	while (!opstack.empty())

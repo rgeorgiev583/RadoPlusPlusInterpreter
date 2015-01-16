@@ -30,12 +30,21 @@ void CompoundStatement::destroy()
 
 CompoundStatement::CompoundStatement(const char*& code): Statement(STATEMENT_COMPOUND)
 {
-	code = strchr(code, '{');
-	code++;
-	std::string token;
+	if (!gotoToken(code, " \t\n\r") || *code != '{')
+	{
+		type = STATEMENT_INVALID;
+		return;
+	}
 
-	while (token = getToken(code, ";"), !token.empty() && token.find('}') == std::string::npos)
+	code++;
+
+	while (gotoToken(code, "; \t\n\r") && *code != '}')
 		body.push_back(Statement::createStatement(code));
+
+	if (*code != '}')
+		type = STATEMENT_INVALID;
+	else
+		code++;
 }
 
 CompoundStatement::CompoundStatement(const CompoundStatement& other)

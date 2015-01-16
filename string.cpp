@@ -5,13 +5,18 @@
  *      Author: radoslav
  */
 
-#include <cstring>
 #include "string.h"
+#include "strtok.h"
+#include <cstring>
 
 
 String::String(const char*& code): Value(VALUE_STRING)
 {
-	code++;
+	gotoToken(code, " \t\n\r");
+
+	if (*code == '"')
+		code++;
+
 	size_t len = strcspn(code, "\"");
 	str = std::string(code, len);
 	code += len;

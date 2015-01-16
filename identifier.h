@@ -11,7 +11,6 @@
 #include "value.h"
 #include <string>
 
-
 class Identifier: public Value
 {
 	std::string name;
@@ -24,7 +23,7 @@ public:
 	Identifier* clone() const { return new Identifier(*this); }
 
 	const std::string& getName() const { return name; }
+	bool operator<(const Identifier b) const; // this is a hack!!!
 };
-
 
 #endif /* IDENTIFIER_H_ */

@@ -11,7 +11,10 @@
 #include <string>
 
 std::string getToken(const char*&, const char*);
-std::string getToken(const std::string&, const char*);
+std::string peekToken(const char*&, const char*);
+bool gotoToken(const char*&, const char*);
+bool ignoreToken(const char*&, const char*);
+std::string peekToken(const std::string&, const char*);
 
 
 #endif /* STRTOK_H_ */
