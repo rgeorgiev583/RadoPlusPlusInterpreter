@@ -9,6 +9,9 @@
 #define STATEMENT_H_
 
 #include "value.h"
+#include "identifier.h"
+#include "environment.h"
+#include <map>
 
 
 enum STATEMENT_TYPE
@@ -19,7 +22,7 @@ enum STATEMENT_TYPE
 	STATEMENT_COMPOUND
 };
 
-class Statement: public Value
+class Statement: public Cloneable
 {
 	STATEMENT_TYPE type;
 
@@ -30,7 +33,8 @@ public:
 
 	virtual Statement* clone() const = 0;
 
-	STATEMENT_TYPE getType() const { return type; }
+	STATEMENT_TYPE getStatementType() const { return type; }
+	virtual Value* execute(Environment&) const = 0;
 };
 
 

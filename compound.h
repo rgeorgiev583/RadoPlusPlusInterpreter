@@ -9,6 +9,7 @@
 #define COMPOUND_H_
 
 #include "statement.h"
+#include "environment.h"
 #include <vector>
 
 
@@ -29,6 +30,9 @@ public:
 	CompoundStatement* clone() const { return new CompoundStatement(*this); }
 
 	std::vector<Statement*>::const_iterator getBodyIterator() const { return body.begin(); }
+	std::vector<Statement*>::const_iterator getBodyEndIterator() const { return body.end(); }
+
+	Value* execute(Environment&) const;
 };
 
 

@@ -6,9 +6,20 @@
  */
 
 #include "lambda.h"
-
 #include "strtok.h"
+#include "identifier.h"
 
+
+void Lambda::copy(const Lambda& other)
+{
+	signature = other.signature;
+	body = other.body->clone();
+}
+
+void Lambda::destroy()
+{
+	delete body;
+}
 
 Lambda::Lambda(const char*& code): Value(VALUE_LAMBDA)
 {
@@ -39,5 +50,26 @@ Lambda::Lambda(const char*& code): Value(VALUE_LAMBDA)
 	}
 
 	body = Statement::createStatement(code);
+}
+
+Lambda::Lambda(const Lambda& other)
+{
+	copy(other);
+}
+
+Lambda& Lambda::operator=(const Lambda& other)
+{
+	if (&other != this)
+	{
+		destroy();
+		copy(other);
+	}
+
+	return *this;
+}
+
+Lambda::~Lambda()
+{
+	destroy();
 }
 

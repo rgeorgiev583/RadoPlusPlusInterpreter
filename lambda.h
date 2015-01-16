@@ -9,7 +9,8 @@
 #define LAMBDA_H_
 
 #include "value.h"
-#include "statement.h"
+#include "compound.h"
+#include "identifier.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -17,16 +18,23 @@
 
 class Lambda: public Value
 {
-	std::vector<std::string> signature;
+	std::vector<Identifier> signature;
 	Statement* body;
+
+	void copy(const Lambda&);
+	void destroy();
 
 public:
 	Lambda(): Value(VALUE_LAMBDA) {}
 	Lambda(const char*&);
+	Lambda(const Lambda&);
+	Lambda& operator=(const Lambda&);
+	~Lambda();
 
 	Lambda* clone() const { return new Lambda(*this); }
 
-	std::vector<std::string>::const_iterator getSignatureIterator() const { return signature.begin(); }
+	std::vector<Identifier>::const_iterator getSignatureIterator() const { return signature.begin(); }
+	std::vector<Identifier>::const_iterator getSignatureEndIterator() const { return signature.end(); }
 	const Statement* getBody() const { return body; }
 };
 

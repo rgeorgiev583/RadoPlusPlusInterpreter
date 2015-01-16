@@ -16,7 +16,7 @@ class String: public Value
 	std::string str;
 
 public:
-	String(const std::string& _str): Value(VALUE_STRING), str(_str) {}
+	String(const std::string& _str = std::string()): Value(VALUE_STRING), str(_str) {}
 	String(const char*&);
 
 	String* clone() const { return new String(*this); }

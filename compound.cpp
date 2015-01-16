@@ -7,6 +7,8 @@
 
 #include "compound.h"
 #include "strtok.h"
+#include "environment.h"
+#include "value.h"
 #include <cstring>
 #include <string>
 
@@ -55,5 +57,28 @@ CompoundStatement& CompoundStatement::operator=(const CompoundStatement& other)
 CompoundStatement::~CompoundStatement()
 {
 	destroy();
+}
+
+Value* CompoundStatement::execute(Environment& environment) const
+{
+	Environment child_environment(environment);
+
+	for (std::vector<Statement*>::const_iterator it = body.begin(); it != body.end(); it++)
+	{
+		Value* retval = (*it)->execute(child_environment);
+
+		for (Environment::iterator it = environment.begin(); it != environment.end(); it++)
+		{
+			Value* value = child_environment[(*it).first];
+
+			if ((*it).second != value)
+				(*it).second = value;
+		}
+
+		if (retval)
+			return retval;
+	}
+
+	return NULL;
 }
 
