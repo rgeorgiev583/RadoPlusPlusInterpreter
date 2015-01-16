@@ -54,8 +54,8 @@ Value* SimpleStatement::execute(Environment& environment) const
 				delete (*it).second;
 				(*it).second = rhs.evaluate(environment);
 			}
-
-			environment[lhs] = rhs.evaluate(environment);
+			else
+				environment[lhs] = rhs.evaluate(environment);
 		}
 
 		break;
