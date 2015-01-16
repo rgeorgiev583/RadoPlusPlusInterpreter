@@ -9,6 +9,8 @@
 #include "strtok.h"
 #include "identifier.h"
 #include "environment.h"
+#include "integer.h"
+#include "string.h"
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -64,8 +66,22 @@ Value* SimpleStatement::execute(Environment& environment) const
 		return rhs.evaluate(environment);
 
 	case STATEMENT_OUTPUT:
-		std::cout << rhs.evaluate(environment);
-		break;
+		{
+			Value* value = rhs.evaluate(environment);
+
+			switch (value->getValueType())
+			{
+			case VALUE_INTEGER:
+				std::cout << ((Integer*) value)->getInteger();
+				break;
+
+			case VALUE_STRING:
+				std::cout << ((String*) value)->getString();
+			}
+
+			delete value;
+			break;
+		}
 
 	case STATEMENT_INPUT:;
 	}
