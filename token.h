@@ -27,7 +27,7 @@ public:
 
 	virtual Token* clone() const = 0;
 
-	TOKEN_TYPE getType() const { return type; }
+	TOKEN_TYPE getTokenType() const { return type; }
 };
 
 

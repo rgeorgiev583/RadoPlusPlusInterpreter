@@ -10,29 +10,30 @@
 
 #include "exprtree.h"
 #include "statement.h"
+#include "identifier.h"
+#include "value.h"
 #include <queue>
 #include <vector>
 #include <map>
-#include "value.h"
 
 
 class CallStackFrame
 {
-	std::queue<Statement, std::vector<Statement> > procedure;
-	std::map<std::string, ExpressionTree> state;
+	std::queue<Statement*, std::vector<Statement*> > procedure;
+	Environment environment;
 
-protected:
-
+	void copy(const CallStackFrame&);
+	void destroy();
 
 public:
 	CallStackFrame() {}
-	CallStackFrame(const std::vector<Statement>& procedure_body, const std::map<std::string, ExpressionTree>& arguments):
-			procedure(procedure_body), state(arguments) {}
+	CallStackFrame(const std::vector<Statement>& procedure_body, const Environment& arguments):
+			procedure(procedure_body), environment(arguments) {}
+	//CallStackFrame()
 
 
 	Statement getNextStatement() const { return procedure.front(); }
-	std::map<std::string, ExpressionTree>::const_iterator getStateIterator() const { return state.begin(); }
-
+	std::map<std::string, Value*>::const_iterator getStateIterator() const { return environment.begin(); }
 };
 
 

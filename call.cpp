@@ -14,7 +14,7 @@
 #include <map>
 
 
-void Call::create(const char*& code)
+Call::Call(const char*& code)
 {
 	name = Identifier(code);
 
@@ -37,24 +37,39 @@ void Call::create(const char*& code)
 	}
 }
 
-void Call::assignLambda(Environment& environment)
+Value* Call::execute(Environment& environment) const
 {
+	EnvironmentIterator eit = environment.find(name);
+	Lambda* lambda = NULL;
 
-}
+	if (eit != environment.end())
+	{
+		Value* value = (*eit).second;
 
-Call::Call(const Identifier& _name, const std::vector<ExpressionTree>& _arguments, Environment& environment): Call(_name, _arguments)
-{
-	assignLambda(environment);
-}
+		if (value->getTokenType() == TOKEN_VALUE && ((Value*) value)->getValueType() == VALUE_LAMBDA)
+			lambda = (Lambda*) value;
+	}
 
-Call::Call(const char*& code)
-{
-	create(code);
-}
+	Environment child_environment(environment);
+	std::vector<Identifier>::const_iterator pit;
+	std::vector<ExpressionTree>::const_iterator ait;
 
-Call::Call(const char*& code, Environment& environment)
-{
-	create(code);
-	assignLambda(environment);
+	for (pit = lambda->getSignatureIterator(), ait = arguments.begin();
+		 pit != lambda->getSignatureEndIterator() && ait != arguments.end();
+		 pit++, ait++)
+
+		child_environment[(*pit).getName()] = (*ait).evaluate(environment);
+
+	Value* retval = lambda->getBody()->execute(child_environment);
+
+	for (Environment::iterator it = environment.begin(); it != environment.end(); it++)
+	{
+		Value* value = child_environment[(*it).first];
+
+		if ((*it).second != value)
+			(*it).second = value;
+	}
+
+	return retval;
 }
 

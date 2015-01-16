@@ -10,6 +10,7 @@
 
 #include "statement.h"
 #include "exprtree.h"
+#include "identifier.h"
 #include <string>
 
 
@@ -24,18 +25,20 @@ enum SIMPLE_STATEMENT_TYPE
 class SimpleStatement: public Statement
 {
 	SIMPLE_STATEMENT_TYPE type;
-	std::string lhs;
+	Identifier lhs;
 	ExpressionTree rhs;
 
 public:
 	SimpleStatement(): Statement(STATEMENT_SIMPLE) {}
-	SimpleStatement(const std::string& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
+	SimpleStatement(const Identifier& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
 	SimpleStatement(const char*&);
 
 	SimpleStatement* clone() const { return new SimpleStatement(*this); }
 
-	const std::string& getLhs() const { return lhs; }
+	const Identifier& getLhs() const { return lhs; }
 	ExpressionTreeIterator getRhsIterator() const { return rhs.iterator(); }
+
+	Value* execute(Environment&) const;
 };
 
 

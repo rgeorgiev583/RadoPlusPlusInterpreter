@@ -12,6 +12,9 @@
 #include "lstack.cpp"
 #include "token.h"
 #include "value.h"
+#include "identifier.h"
+#include "environment.h"
+#include <map>
 
 
 typedef TreeNode<Token*> ExpressionTreeNode;
@@ -20,6 +23,7 @@ typedef BinaryTreeIterator<Token*> ExpressionTreeIterator;
 class ExpressionTree: public BinaryTree<Token*>
 {
 	static void createTree(LinkedStack<ExpressionTree>&, char);
+	static Value* evaluateExpression(ExpressionTreeIterator, Environment&);
 
 	void deleteNode(ExpressionTreeNode* node);
 	ExpressionTreeNode* copyNode(ExpressionTreeNode* src);
@@ -35,7 +39,7 @@ public:
 	~ExpressionTree();
 
 	ExpressionTreeIterator iterator() const { return ExpressionTreeIterator(root); }
-	Value* evaluate();
+	Value* evaluate(Environment& environment) const { return evaluateExpression(iterator(), environment); }
 };
 
 

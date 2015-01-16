@@ -18,7 +18,8 @@ enum VALUE_TYPE
 	VALUE_INTEGER,
 	VALUE_STRING,
 	VALUE_LAMBDA,
-	VALUE_IDENTIFIER
+	VALUE_IDENTIFIER,
+	VALUE_CALL
 };
 
 class Value: public Token
@@ -31,7 +32,7 @@ public:
 
     virtual Value* clone() const = 0;
 
-    VALUE_TYPE getType() const { return type; }
+    VALUE_TYPE getValueType() const { return type; }
 };
 
 

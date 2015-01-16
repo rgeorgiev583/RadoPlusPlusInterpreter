@@ -9,15 +9,25 @@
 #define ENVIRONMENT_H_
 
 #include <map>
-#include <stack>
-#include "frame.h"
-#include "statement.h"
+#include "identifier.h"
+#include "value.h"
 
 
-class Environment
+typedef std::map<Identifier, Value*>::iterator EnvironmentIterator;
+typedef std::map<Identifier, Value*>::const_iterator ConstEnvironmentIterator;
+
+class Environment: public std::map<Identifier, Value*>
 {
-	std::stack<CallStackFrame> callStack;
-	std::vector<Statement> program;
+	//std::stack<CallStackFrame> callStack;
+	//CompoundStatement program;
+	void copy(const Environment&);
+	void destroy();
+
+public:
+	Environment();
+	Environment(const Environment&);
+	Environment& operator=(const Environment&);
+	~Environment();
 };
 
 

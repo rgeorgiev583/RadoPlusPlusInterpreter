@@ -12,11 +12,16 @@
 #include "token.h"
 #include "operator.h"
 #include "lambda.h"
+#include "integer.h"
+#include "string.h"
+#include "identifier.h"
+#include "strtok.h"
+#include "call.h"
+#include "environment.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
-#include "integer.h"
-#include "string.h"
+#include <map>
 
 
 void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
@@ -24,6 +29,57 @@ void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
 	ExpressionTree rtree = rstack.pop();
 	ExpressionTree ltree = rstack.pop();
 	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
+}
+
+Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment& environment)
+{
+	switch ((*it)->getTokenType())
+	{
+	case TOKEN_VALUE:
+		// листо
+		switch (((Value*) (*it))->getValueType())
+		{
+		case VALUE_IDENTIFIER:
+			return environment[*((Identifier*) (*it))];
+
+		case VALUE_CALL:
+			return ((Call*) (*it))->execute(environment);
+
+		default:
+			return (Value*) *it;
+		}
+		break;
+
+	case TOKEN_OPERATOR:
+		{
+			Value *lhs = evaluateExpression(++it, environment), *rhs = evaluateExpression(it++, environment);
+
+			if (lhs->getValueType() == VALUE_INTEGER && rhs->getValueType() == VALUE_INTEGER)
+			{
+				int lhs_val = ((Integer*) lhs)->getInteger(), rhs_val = ((Integer*) rhs)->getInteger();
+
+				switch (((Operator*) (*it))->getOperator())
+				{
+					case '+': return new Integer(lhs_val + rhs_val);
+					case '-': return new Integer(lhs_val - rhs_val);
+					case '*': return new Integer(lhs_val * rhs_val);
+					case '/': return new Integer(lhs_val / rhs_val);
+					case '^': return new Integer(ipow(lhs_val, rhs_val));
+					default:  return 0;
+				}
+			}
+			else if (lhs->getValueType() == VALUE_STRING && rhs->getValueType() == VALUE_STRING)
+			{
+				std::string lhs_val = ((String*) lhs)->getString(), rhs_val = ((String*) rhs)->getString();
+				return ((Operator*) (*it))->getOperator() == '+' ? new String(lhs_val + rhs_val) : new String();
+			}
+		}
+		break;
+
+	default:;
+	}
+
+	return NULL;
 }
 
 ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
@@ -34,7 +90,7 @@ ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
 	if (!expr)
 		return ExpressionTree();
 
-	while (*expr && *expr != ';')
+	while (*expr && *expr != ';' && *expr != ',')
     {
 		if (*expr >= '0' && *expr <= '9' || *expr == '-' && expr + 1 && *(expr + 1) >= '0' && *(expr + 1) <= '9')
 			rstack.push(ExpressionTree(new Integer(expr)));
@@ -42,6 +98,14 @@ ExpressionTree ExpressionTree::createExpressionTree(char const*& expr)
 			rstack.push(ExpressionTree(new String(expr)));
 		else if (*expr == '\\')
 			rstack.push(ExpressionTree(new Lambda(expr)));
+		else if (*expr >= 'A' && *expr <= 'Z' || *expr >= 'a' && *expr <= 'z')
+		{
+			const char* name = expr;
+			Identifier id(name);
+
+			if (!id.getName().empty())
+				rstack.push(ExpressionTree(getToken(name, " \t\n\r")[0] == '(' ? (Token*) new Call(expr) : (Token*) new Identifier(expr)));
+		}
 		else if (*expr == '(')
 			opstack.push(*expr);
 		else if (*expr == ')')
@@ -119,23 +183,4 @@ ExpressionTree::~ExpressionTree()
 {
 	deleteNode(root);
 }
-
-/*
-AtomicExpression evaluate(ExpressionTreeIterator it, ATOM_TYPE type)
-{
-	if ((*it).getType() == TOKEN_VALUE)
-		// листо
-		return (*it).getInteger();
-    else
-        switch ((*it).getOperator())
-        {
-            case '+': return evaluate(++it) + evaluate(it++);
-            case '-': return evaluate(++it) - evaluate(it++);
-            case '*': return evaluate(++it) * evaluate(it++);
-            case '/': return evaluate(++it) / evaluate(it++);
-            case '^': return ipow(evaluate(++it), evaluate(it++));
-            default: return 0;
-        }
-}
-*/
 
