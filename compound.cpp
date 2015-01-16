@@ -72,7 +72,7 @@ Value* CompoundStatement::execute(Environment& environment) const
 			Value* value = child_environment[(*it).first];
 
 			if ((*it).second != value)
-				(*it).second = value;
+				(*it).second = value->clone();
 		}
 
 		if (retval)

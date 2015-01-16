@@ -50,6 +50,9 @@ Value* Call::execute(Environment& environment) const
 			lambda = (Lambda*) value;
 	}
 
+	if (!lambda)
+		return NULL;
+
 	Environment child_environment(environment);
 	std::vector<Identifier>::const_iterator pit;
 	std::vector<ExpressionTree>::const_iterator ait;
@@ -67,7 +70,7 @@ Value* Call::execute(Environment& environment) const
 		Value* value = child_environment[(*it).first];
 
 		if ((*it).second != value)
-			(*it).second = value;
+			(*it).second = value->clone();
 	}
 
 	return retval;
