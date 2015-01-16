@@ -12,29 +12,28 @@
 #include "value.h"
 #include "environment.h"
 #include <map>
+#include <cstring>
 
 
 Call::Call(const char*& code)
 {
 	name = Identifier(code);
 
-	if (getToken(code, ", \t\n\r")[0] != '(')
+	if (!gotoToken(code, " \t\n\r") || *code != '(')
 	{
 		type = VALUE_INVALID;
 		return;
 	}
 
-	std::string token;
 	code++;
 
-	do
+	while (gotoToken(code, ", \t\n\r") && *code != ')')
 		arguments.push_back(ExpressionTree::createExpressionTree(code));
-	while (token = getToken(code, " \t\n\r"), !token.empty() && token[0] == ',');
 
-	if (token.empty() || token[0] != ')')
-	{
+	if (*code != ')')
 		type = VALUE_INVALID;
-	}
+	else
+		code++;
 }
 
 Value* Call::execute(Environment& environment) const

@@ -18,29 +18,48 @@
 
 SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 {
-	std::string lhs_expr = getToken(code, "= \t\n\r");
+	std::string lhs_expr = peekToken(code, " \t\n\r");
 
 	if (lhs_expr == "input")
 	{
 		type = STATEMENT_INPUT;
+		ignoreToken(code, " \t\n\r");
 		lhs = Identifier(code);
 	}
 	else
 	{
 		if (lhs_expr == "return")
+		{
 			type = STATEMENT_RETURN;
+			ignoreToken(code, " \t\n\r");
+		}
 		else if (lhs_expr == "print")
+		{
 			type = STATEMENT_OUTPUT;
+			ignoreToken(code, " \t\n\r");
+		}
 		else
 		{
 			type = STATEMENT_ASSIGNMENT;
-			lhs = lhs_expr;
-			code = strchr(code, '=');
-			code++;
+			Identifier lhs_assign = Identifier(code);
+
+			if (gotoToken(code, " \t\n\r") && *code == '=')
+			{
+				lhs = lhs_assign;
+				code++;
+			}
+			else
+			{
+				type = SIMPLE_STATEMENT_INVALID;
+				return;
+			}
 		}
 
 		rhs = ExpressionTree::createExpressionTree(code);
 	}
+
+	if (*code != ';')
+		type = SIMPLE_STATEMENT_INVALID;
 }
 
 Value* SimpleStatement::execute(Environment& environment) const

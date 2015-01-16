@@ -8,6 +8,7 @@
 #include "lambda.h"
 #include "strtok.h"
 #include "identifier.h"
+#include <cstring>
 
 
 void Lambda::copy(const Lambda& other)
@@ -23,33 +24,32 @@ void Lambda::destroy()
 
 Lambda::Lambda(const char*& code): Value(VALUE_LAMBDA)
 {
-	if (getToken(code, "( \t\n\r") != "\\")
+	if (!gotoToken(code, " \t\n\r") || *code != '\\')
 	{
 		type = VALUE_INVALID;
 		return;
 	}
 
-	if (getToken(code, ", \t\n\r")[0] != '(')
-	{
-		type = VALUE_INVALID;
-		return;
-	}
-
-	std::string token;
 	code++;
 
-	while (token = getToken(code, ", \t\n\r"), !token.empty() && token.find(')') == std::string::npos)
-		signature.push_back(token);
-
-	if (!token.empty())
+	if (!gotoToken(code, " \t\n\r") || *code != '(')
 	{
-		std::string last_param = getToken(token, "), \t\n\r");
-
-		if (!last_param.empty())
-			signature.push_back(last_param);
+		type = VALUE_INVALID;
+		return;
 	}
 
-	body = Statement::createStatement(code);
+	code++;
+
+	while (gotoToken(code, ", \t\n\r") && *code != ')')
+		signature.push_back(Identifier(code));
+
+	if (*code != ')')
+		type = VALUE_INVALID;
+	else
+	{
+		code++;
+		body = Statement::createStatement(code);
+	}
 }
 
 Lambda::Lambda(const Lambda& other)

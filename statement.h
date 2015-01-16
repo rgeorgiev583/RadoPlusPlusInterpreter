@@ -24,6 +24,7 @@ enum STATEMENT_TYPE
 
 class Statement: public Cloneable
 {
+protected:
 	STATEMENT_TYPE type;
 
 public:
