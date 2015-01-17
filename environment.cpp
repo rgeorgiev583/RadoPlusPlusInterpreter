@@ -7,11 +7,11 @@
 
 #include "environment.h"
 
-void Environment::copy(const Environment& other)
+void Environment::clone()
 {
-	for (ConstEnvironmentIterator it = other.begin(); it != other.end(); it++)
+	for (EnvironmentIterator it = begin(); it != end(); it++)
 		if ((*it).second)
-			this->at((*it).first) = (*it).second->clone();
+			(*it).second = (*it).second->clone();
 }
 
 void Environment::destroy()
@@ -22,9 +22,9 @@ void Environment::destroy()
 
 Environment::Environment(): std::map<Identifier, Value*>() {}
 
-Environment::Environment(const Environment& other)
+Environment::Environment(const Environment& other): std::map<Identifier, Value*>(other)
 {
-	copy(other);
+	clone();
 }
 
 Environment& Environment::operator=(const Environment& other)
@@ -32,7 +32,8 @@ Environment& Environment::operator=(const Environment& other)
 	if (&other != this)
 	{
 		destroy();
-		copy(other);
+		std::map<Identifier, Value*>::operator=(other);
+		clone();
 	}
 
 	return *this;
