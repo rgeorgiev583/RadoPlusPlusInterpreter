@@ -8,34 +8,43 @@
 #ifndef CALL_H_
 #define CALL_H_
 
+#include "value.h"
 #include "identifier.h"
 #include "exprtree.h"
-#include "lambda.h"
-#include "environment.h"
 #include <vector>
-#include <map>
+
+
+enum CALL_TYPE
+{
+	CALL_INVALID,
+	CALL_FUNCTION
+};
 
 class Call: public Value
 {
+protected:
+	CALL_TYPE type;
 	Identifier name;
 	std::vector<ExpressionTree> arguments;
 
-	void create(const char*&);
-	void assignLambda(Environment&);
+	void parse(const char*&);
 
 public:
-	Call(): Value(VALUE_CALL) {}
-	Call(const Identifier& _name, const std::vector<ExpressionTree>& _arguments):
-			Value(VALUE_CALL), name(_name), arguments(_arguments) {}
+	static Call* create(const char*&);
+
+	Call(CALL_TYPE _type = CALL_INVALID): Value(VALUE_CALL), type(_type) {}
+	Call(CALL_TYPE _type, const Identifier& _name, const std::vector<ExpressionTree>& _arguments):
+			type(_type), name(_name), arguments(_arguments) {}
 	Call(const char*&);
 
-	Call* clone() const { return new Call(*this); }
+	virtual Call* clone() const = 0;
 
+	CALL_TYPE getCallType() const { return type; }
 	const Identifier& getIdentifier() const { return name; }
 	std::vector<ExpressionTree>::const_iterator getArgumentIterator() const { return arguments.begin(); }
 	std::vector<ExpressionTree>::const_iterator getArgumentEndIterator() const { return arguments.end(); }
 
-	Value* execute(Environment&) const;
+	virtual Value* execute(Environment&) const = 0;
 };
 
 

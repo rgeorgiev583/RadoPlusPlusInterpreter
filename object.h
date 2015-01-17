@@ -10,26 +10,21 @@
 
 #include "identifier.h"
 #include "value.h"
+#include "exprtree.h"
 #include <map>
 
 
-typedef std::map<Identifier, Value*>::iterator ObjectIterator;
-typedef std::map<Identifier, Value*>::const_iterator ConstObjectIterator;
+typedef std::map<Identifier, ExpressionTree>::iterator ObjectIterator;
+typedef std::map<Identifier, ExpressionTree>::const_iterator ConstObjectIterator;
 
-class Object: public Value, public std::map<Identifier, Value*>
+class Object: public Value, public std::map<Identifier, ExpressionTree>
 {
-	void copy(const Object&);
-	void destroy();
-
 public:
 	Object(): Value(VALUE_OBJECT) {}
 	Object(const char*&);
-	Object(const Object&);
-	Object& operator=(const Object&);
-	~Object();
 
 	Object* clone() const { return new Object(*this); }
-}
+};
 
 
 #endif /* OBJECT_H_ */

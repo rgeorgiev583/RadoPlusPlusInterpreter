@@ -11,6 +11,7 @@
 #include "statement.h"
 #include "exprtree.h"
 #include "identifier.h"
+#include "reference.h"
 #include <string>
 
 
@@ -25,7 +26,7 @@ enum SIMPLE_STATEMENT_TYPE
 
 class SimpleStatement: public Statement
 {
-	Identifier lhs;
+	Reference lhs;
 	ExpressionTree rhs;
 
 protected:
@@ -33,12 +34,12 @@ protected:
 
 public:
 	SimpleStatement(): Statement(STATEMENT_SIMPLE) {}
-	SimpleStatement(const Identifier& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
+	SimpleStatement(const Reference& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
 	SimpleStatement(const char*&);
 
 	SimpleStatement* clone() const { return new SimpleStatement(*this); }
 
-	const Identifier& getLhs() const { return lhs; }
+	const Reference& getLhs() const { return lhs; }
 	ExpressionTreeConstIterator getRhsIterator() const { return rhs.getConstIterator(); }
 
 	Value* execute(Environment&) const;

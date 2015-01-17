@@ -11,6 +11,7 @@
 #include "environment.h"
 #include "integer.h"
 #include "string.h"
+#include "object.h"
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -24,7 +25,7 @@ SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 	{
 		type = STATEMENT_INPUT;
 		ignoreToken(code, " \t\n\r");
-		lhs = Identifier(code);
+		lhs = Reference(code);
 	}
 	else
 	{
@@ -41,7 +42,7 @@ SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 		else
 		{
 			type = STATEMENT_ASSIGNMENT;
-			Identifier lhs_assign = Identifier(code);
+			Reference lhs_assign = Reference(code);
 
 			if (gotoToken(code, " \t\n\r") && *code == '=')
 			{
@@ -68,19 +69,65 @@ SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 
 Value* SimpleStatement::execute(Environment& environment) const
 {
+	ExpressionTree* etree = (ExpressionTree*) &rhs;
+
 	switch (type)
 	{
+	case STATEMENT_INPUT:
+		{
+			std::string raw_input, line;
+
+			do
+			{
+				getline(std::cin, line);
+				raw_input += line + '\n';
+			}
+			while (!std::cin.eof());
+
+			const char* input_iterator = raw_input.c_str();
+			*etree = ExpressionTree::createExpressionTree(input_iterator);
+		}
+
 	case STATEMENT_ASSIGNMENT:
 		{
-			Environment::iterator it = environment.find(lhs);
+			Identifier name = lhs.getMemberName(), object_name = lhs.getObjectName();
 
-			if (it != environment.end())
+			if (object_name.getName().empty())
 			{
-				delete (*it).second;
-				(*it).second = rhs.evaluate(environment);
+				Environment::iterator it = environment.find(name);
+
+				if (it != environment.end())
+				{
+					delete (*it).second;
+					(*it).second = etree->evaluate(environment);
+				}
+				else
+					environment[name] = etree->evaluate(environment);
 			}
 			else
-				environment[lhs] = rhs.evaluate(environment);
+			{
+				Environment::iterator eit = environment.find(object_name);
+				Object* object = NULL;
+
+				if (eit != environment.end())
+				{
+					Value* value = (*eit).second;
+
+					if (value->getTokenType() == TOKEN_VALUE && ((Value*) value)->getValueType() == VALUE_OBJECT)
+						object = (Object*) value;
+
+					if (!object)
+						return NULL;
+
+					object->operator[](name) = etree->evaluate(environment);
+				}
+				else
+				{
+					object = new Object();
+					object->operator[](name) = etree->evaluate(environment);
+					environment[object_name] = object;
+				}
+			}
 		}
 
 		break;
@@ -91,6 +138,9 @@ Value* SimpleStatement::execute(Environment& environment) const
 	case STATEMENT_OUTPUT:
 		{
 			Value* value = rhs.evaluate(environment);
+
+			if (!value)
+				return NULL;
 
 			switch (value->getValueType())
 			{
@@ -103,10 +153,7 @@ Value* SimpleStatement::execute(Environment& environment) const
 			}
 
 			delete value;
-			break;
 		}
-
-	case STATEMENT_INPUT:;
 	}
 
 	return NULL;

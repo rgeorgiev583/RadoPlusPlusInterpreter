@@ -9,14 +9,18 @@
 #include "arithmetic.h"
 #include "token.h"
 #include "operator.h"
+#include "lambda.h"
 #include "object.h"
 #include "integer.h"
 #include "string.h"
 #include "identifier.h"
 #include "strtok.h"
 #include "call.h"
+#include "constructor-call.h"
+#include "function-call.h"
 #include "environment.h"
 #include "value.h"
+#include "reference.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -76,8 +80,13 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 		// листо
 		switch (((Value*) (*it))->getValueType())
 		{
-		case VALUE_IDENTIFIER:
-			return environment[*((Identifier*) (*it))]->clone();
+		case VALUE_REFERENCE:
+			{
+				Reference* reference = (Reference*) (*it);
+				Identifier objectName = reference->getObjectName(), memberName = reference->getMemberName();
+				return objectName.getName().empty() ? environment.at(memberName)->clone() :
+						((Object*) environment[objectName])->at(memberName).evaluate(environment);
+			}
 
 		case VALUE_CALL:
 			return ((Call*) (*it))->execute(environment);
@@ -110,6 +119,12 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 				std::string lhs_val = ((String*) lhs)->getString(), rhs_val = ((String*) rhs)->getString();
 				return ((Operator*) (*it))->getOperator() == '+' ? new String(lhs_val + rhs_val) : new String();
 			}
+			else if (lhs->getValueType() == VALUE_OBJECT && rhs->getValueType() == VALUE_OBJECT)
+			{
+				Object *new_object = new Object(*((Object*) (lhs))), *rhs_object = (Object*) (rhs);
+				new_object->insert(rhs_object->begin(), rhs_object->end());
+				return new_object;
+			}
 
 			delete lhs;
 			delete rhs;
@@ -136,6 +151,8 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 			rstack.push(ExpressionTree(new Integer(expr)));
 		else if (*expr == '"')
 			rstack.push(ExpressionTree(new String(expr)));
+		else if (*expr == '\\')
+			rstack.push(ExpressionTree(new Lambda(expr)));
 		else if (*expr == '{')
 			rstack.push(ExpressionTree(new Object(expr)));
 		else if (*expr >= 'A' && *expr <= 'Z' || *expr >= 'a' && *expr <= 'z')
@@ -143,8 +160,11 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 			const char* name = expr;
 			Identifier id(name);
 
-			if (!id.getName().empty())
-				rstack.push(ExpressionTree(gotoToken(name, " \t\n\r") && *name == '(' ? (Token*) new Call(expr) : (Token*) new Identifier(expr)));
+			if (id.getName() == "new")
+				rstack.push(ExpressionTree(new ConstructorCall(expr)));
+			else if (!id.getName().empty())
+				rstack.push(ExpressionTree(gotoToken(name, " \t\n\r") && *name == '(' ?
+						(Token*) new FunctionCall(expr) : (Token*) new Reference(expr)));
 		}
 		else
 		{
