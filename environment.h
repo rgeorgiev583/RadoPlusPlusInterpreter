@@ -18,7 +18,7 @@ typedef std::map<Identifier, Value*>::const_iterator ConstEnvironmentIterator;
 
 class Environment: public std::map<Identifier, Value*>
 {
-	void clone();
+	void cloneAll();
 	void destroy();
 
 public:
