@@ -47,7 +47,7 @@ CompoundStatement::CompoundStatement(const char*& code): Statement(STATEMENT_COM
 		code++;
 }
 
-CompoundStatement::CompoundStatement(const CompoundStatement& other)
+CompoundStatement::CompoundStatement(const CompoundStatement& other): Statement(other)
 {
 	copy(other);
 }
@@ -57,6 +57,7 @@ CompoundStatement& CompoundStatement::operator=(const CompoundStatement& other)
 	if (&other != this)
 	{
 		destroy();
+		Statement::operator=(other);
 		copy(other);
 	}
 

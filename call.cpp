@@ -15,7 +15,7 @@
 #include <cstring>
 
 
-Call::Call(const char*& code)
+Call::Call(const char*& code): Value(VALUE_CALL)
 {
 	name = Identifier(code);
 

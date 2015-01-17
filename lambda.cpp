@@ -52,7 +52,7 @@ Lambda::Lambda(const char*& code): Value(VALUE_LAMBDA)
 	}
 }
 
-Lambda::Lambda(const Lambda& other)
+Lambda::Lambda(const Lambda& other): Value(other)
 {
 	copy(other);
 }
@@ -62,6 +62,7 @@ Lambda& Lambda::operator=(const Lambda& other)
 	if (&other != this)
 	{
 		destroy();
+		Value::operator=(other);
 		copy(other);
 	}
 
