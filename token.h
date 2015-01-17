@@ -20,6 +20,7 @@ enum TOKEN_TYPE
 
 class Token: public Cloneable
 {
+protected:
 	TOKEN_TYPE type;
 
 public:

@@ -51,6 +51,7 @@ SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 			else
 			{
 				type = SIMPLE_STATEMENT_INVALID;
+				Statement::type = STATEMENT_INVALID;
 				return;
 			}
 		}
@@ -59,7 +60,10 @@ SimpleStatement::SimpleStatement(const char*& code): Statement(STATEMENT_SIMPLE)
 	}
 
 	if (*code != ';')
+	{
 		type = SIMPLE_STATEMENT_INVALID;
+		Statement::type = STATEMENT_INVALID;
+	}
 }
 
 Value* SimpleStatement::execute(Environment& environment) const

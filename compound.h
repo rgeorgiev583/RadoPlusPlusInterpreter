@@ -21,7 +21,7 @@ class CompoundStatement: public Statement
 	void destroy();
 
 public:
-	CompoundStatement(): Statement(STATEMENT_SIMPLE) {}
+	CompoundStatement(): Statement(STATEMENT_COMPOUND) {}
 	CompoundStatement(const char*&);
 	CompoundStatement(const CompoundStatement&);
 	CompoundStatement& operator=(const CompoundStatement&);

@@ -16,7 +16,7 @@ class Operator: public Token
 	char op;
 
 public:
-	Operator(): Token(TOKEN_INVALID) {}
+	Operator(): Token(TOKEN_OPERATOR) {}
 	Operator(char _op): Token(TOKEN_OPERATOR), op(_op) {}
 
 	Operator* clone() const { return new Operator(*this); }

@@ -25,9 +25,11 @@ enum SIMPLE_STATEMENT_TYPE
 
 class SimpleStatement: public Statement
 {
-	SIMPLE_STATEMENT_TYPE type;
 	Identifier lhs;
 	ExpressionTree rhs;
+
+protected:
+	SIMPLE_STATEMENT_TYPE type;
 
 public:
 	SimpleStatement(): Statement(STATEMENT_SIMPLE) {}
@@ -37,7 +39,7 @@ public:
 	SimpleStatement* clone() const { return new SimpleStatement(*this); }
 
 	const Identifier& getLhs() const { return lhs; }
-	ExpressionTreeIterator getRhsIterator() const { return rhs.iterator(); }
+	ExpressionTreeConstIterator getRhsIterator() const { return rhs.getConstIterator(); }
 
 	Value* execute(Environment&) const;
 };

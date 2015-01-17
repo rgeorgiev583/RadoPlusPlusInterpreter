@@ -25,7 +25,8 @@ class Call: public Value
 
 public:
 	Call(): Value(VALUE_CALL) {}
-	Call(const Identifier& _name, const std::vector<ExpressionTree>& _arguments): name(_name), arguments(_arguments) {}
+	Call(const Identifier& _name, const std::vector<ExpressionTree>& _arguments):
+			Value(VALUE_CALL), name(_name), arguments(_arguments) {}
 	Call(const char*&);
 
 	Call* clone() const { return new Call(*this); }

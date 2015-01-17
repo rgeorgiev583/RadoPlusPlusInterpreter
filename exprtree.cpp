@@ -6,8 +6,6 @@
  */
 
 #include "exprtree.h"
-#include "bintree.cpp"
-#include "lstack.cpp"
 #include "arithmetic.h"
 #include "token.h"
 #include "operator.h"
@@ -18,20 +16,59 @@
 #include "strtok.h"
 #include "call.h"
 #include "environment.h"
+#include "value.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
 #include <map>
+#include <stack>
 
 
-void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
+void ExpressionTreeNode::copy(const ExpressionTreeNode& other)
 {
-	ExpressionTree rtree = rstack.pop();
-	ExpressionTree ltree = rstack.pop();
+	value = other.value->clone();
+	left = other.left;
+	right = other.right;
+}
+
+void ExpressionTreeNode::destroy()
+{
+	delete value;
+}
+
+ExpressionTreeNode::ExpressionTreeNode(const ExpressionTreeNode& other)
+{
+	copy(other);
+}
+
+ExpressionTreeNode& ExpressionTreeNode::operator=(const ExpressionTreeNode& other)
+{
+	if (&other != this)
+	{
+		destroy();
+		copy(other);
+	}
+
+	return *this;
+}
+
+ExpressionTreeNode::~ExpressionTreeNode()
+{
+	destroy();
+}
+
+
+void ExpressionTree::createTree(std::stack<ExpressionTree>& rstack, char op)
+{
+	ExpressionTree rtree = rstack.top();
+	rstack.pop();
+	ExpressionTree ltree = rstack.top();
+	rstack.pop();
+
 	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
 }
 
-Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment& environment)
+Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Environment& environment)
 {
 	switch ((*it)->getTokenType())
 	{
@@ -40,13 +77,13 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment
 		switch (((Value*) (*it))->getValueType())
 		{
 		case VALUE_IDENTIFIER:
-			return environment[*((Identifier*) (*it))];
+			return environment[*((Identifier*) (*it))]->clone();
 
 		case VALUE_CALL:
 			return ((Call*) (*it))->execute(environment);
 
 		default:
-			return (Value*) *it;
+			return ((Value*) *it)->clone();
 		}
 		break;
 
@@ -65,7 +102,7 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment
 					case '*': return new Integer(lhs_val * rhs_val);
 					case '/': return new Integer(lhs_val / rhs_val);
 					case '^': return new Integer(ipow(lhs_val, rhs_val));
-					default:  return 0;
+					default:  return NULL;
 				}
 			}
 			else if (lhs->getValueType() == VALUE_STRING && rhs->getValueType() == VALUE_STRING)
@@ -73,6 +110,9 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment
 				std::string lhs_val = ((String*) lhs)->getString(), rhs_val = ((String*) rhs)->getString();
 				return ((Operator*) (*it))->getOperator() == '+' ? new String(lhs_val + rhs_val) : new String();
 			}
+
+			delete lhs;
+			delete rhs;
 		}
 		break;
 
@@ -84,8 +124,8 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment
 
 ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 {
-	LinkedStack<char> opstack;
-	LinkedStack<ExpressionTree> rstack;
+	std::stack<char> opstack;
+	std::stack<ExpressionTree> rstack;
 
 	if (!expr)
 		return ExpressionTree();
@@ -112,11 +152,14 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 				opstack.push(*expr);
 			else if (*expr == ')')
 			{
-				char op = opstack.pop();
+				char op = opstack.top();
+				opstack.pop();
 
-				while (op != '(') {
+				while (op != '(')
+				{
 					createTree(rstack, op);
-					op = opstack.pop();
+					op = opstack.top();
+					opstack.pop();
 				}
 			}
 			else if (*expr != ' ' && *expr != '\t' && *expr != '\n' && *expr != '\r')
@@ -124,10 +167,11 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 				// *expr е операция
 				// първо: вадим всички операции
 				// с по-висок или равен приоритет
-				while (!opstack.empty() &&
-					   priority(opstack.last()) >=
-					   priority(*expr))
-					createTree(rstack, opstack.pop());
+				while (!opstack.empty() && priority(opstack.top()) >= priority(*expr))
+				{
+					createTree(rstack, opstack.top());
+					opstack.pop();
+				}
 
 				opstack.push(*expr);
 			}
@@ -137,34 +181,35 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 	}
 
 	while (!opstack.empty())
-		createTree(rstack, opstack.pop());
+	{
+		createTree(rstack, opstack.top());
+		opstack.pop();
+	}
 
-	return rstack.pop();
+	return rstack.top();
 }
 
 void ExpressionTree::deleteNode(ExpressionTreeNode* node)
 {
-	if (node != NULL)
+	if (node)
 	{
-		delete node->data;
 		deleteNode(node->left);
 		deleteNode(node->right);
 		delete node;
 	}
 }
 
-
-ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
+ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* node)
 {
-	if (src == NULL)
-		return NULL;
-
-	return new ExpressionTreeNode(src->data->clone(), copyNode(src->left), copyNode(src->right));
+	return node ? new ExpressionTreeNode(node->value, true, copyNode(node->left), copyNode(node->right)) : NULL;
 }
 
-ExpressionTree::ExpressionTree(const Token* data): BinaryTree<Token*>(data->clone()) {}
-
-ExpressionTree::ExpressionTree(const Token* data, ExpressionTree& left, ExpressionTree& right): BinaryTree<Token*>(data->clone(), left, right) {}
+ExpressionTree::ExpressionTree(Token* value, ExpressionTree& left, ExpressionTree& right, bool doClone)
+{
+	root = new ExpressionTreeNode(value, doClone);
+	adoptLeft(left.root);
+	adoptRight(right.root);
+}
 
 ExpressionTree::ExpressionTree(const ExpressionTree& other)
 {

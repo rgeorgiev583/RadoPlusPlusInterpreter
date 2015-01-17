@@ -18,9 +18,7 @@ typedef std::map<Identifier, Value*>::const_iterator ConstEnvironmentIterator;
 
 class Environment: public std::map<Identifier, Value*>
 {
-	//std::stack<CallStackFrame> callStack;
-	//CompoundStatement program;
-	void copy(const Environment&);
+	void cloneAll();
 	void destroy();
 
 public:
