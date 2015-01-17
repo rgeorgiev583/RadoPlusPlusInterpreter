@@ -14,14 +14,14 @@ using namespace std;
 
 int main()
 {
-	string program;
+	string program, line;
 
-	while (!cin.eof())
+	do
 	{
-		string line;
 		getline(cin, line);
 		program += line + '\n';
 	}
+	while (!cin.eof() && line != "--");
 
 	const char* program_cstr = program.c_str();
 	CompoundStatement cs(program_cstr);
