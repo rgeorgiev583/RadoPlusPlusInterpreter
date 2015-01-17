@@ -37,7 +37,7 @@ public:
 	SimpleStatement* clone() const { return new SimpleStatement(*this); }
 
 	const Identifier& getLhs() const { return lhs; }
-	ExpressionTreeIterator getRhsIterator() const { return rhs.iterator(); }
+	ExpressionTreeIterator getRhsIterator() const { return rhs.getIterator(); }
 
 	Value* execute(Environment&) const;
 };

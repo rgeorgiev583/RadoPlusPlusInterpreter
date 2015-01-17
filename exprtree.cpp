@@ -6,7 +6,6 @@
  */
 
 #include "exprtree.h"
-#include "bintree.cpp"
 #include "lstack.cpp"
 #include "arithmetic.h"
 #include "token.h"
@@ -24,6 +23,40 @@
 #include <map>
 
 
+void ExpressionTreeNode::copy(const ExpressionTreeNode& other)
+{
+	value = other.value->clone();
+	left = other.left;
+	right = other.right;
+}
+
+void ExpressionTreeNode::destroy()
+{
+	delete value;
+}
+
+ExpressionTreeNode::ExpressionTreeNode(const ExpressionTreeNode& other)
+{
+	copy(other);
+}
+
+ExpressionTreeNode& ExpressionTreeNode::operator=(const ExpressionTreeNode& other)
+{
+	if (&other != this)
+	{
+		destroy();
+		copy(other);
+	}
+
+	return *this;
+}
+
+ExpressionTreeNode::~ExpressionTreeNode()
+{
+	destroy();
+}
+
+
 void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
 {
 	ExpressionTree rtree = rstack.pop();
@@ -31,7 +64,7 @@ void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
 	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
 }
 
-Value* ExpressionTree::evaluateExpression(ExpressionTreeIterator it, Environment& environment)
+Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Environment& environment)
 {
 	switch ((*it)->getTokenType())
 	{
@@ -144,27 +177,25 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 
 void ExpressionTree::deleteNode(ExpressionTreeNode* node)
 {
-	if (node != NULL)
+	if (node)
 	{
-		delete node->data;
 		deleteNode(node->left);
 		deleteNode(node->right);
 		delete node;
 	}
 }
 
-
-ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* src)
+ExpressionTreeNode* ExpressionTree::copyNode(ExpressionTreeNode* node)
 {
-	if (src == NULL)
-		return NULL;
-
-	return new ExpressionTreeNode(src->data->clone(), copyNode(src->left), copyNode(src->right));
+	return node ? new ExpressionTreeNode(node->value, true, copyNode(node->left), copyNode(node->right)) : NULL;
 }
 
-ExpressionTree::ExpressionTree(const Token* data): BinaryTree<Token*>(data->clone()) {}
-
-ExpressionTree::ExpressionTree(const Token* data, ExpressionTree& left, ExpressionTree& right): BinaryTree<Token*>(data->clone(), left, right) {}
+ExpressionTree::ExpressionTree(Token* value, ExpressionTree& left, ExpressionTree& right, bool doClone)
+{
+	root = new ExpressionTreeNode(value, doClone);
+	adoptLeft(left.root);
+	adoptRight(right.root);
+}
 
 ExpressionTree::ExpressionTree(const ExpressionTree& other)
 {
