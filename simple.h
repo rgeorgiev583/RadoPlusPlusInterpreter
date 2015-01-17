@@ -25,12 +25,14 @@ enum SIMPLE_STATEMENT_TYPE
 
 class SimpleStatement: public Statement
 {
-	SIMPLE_STATEMENT_TYPE type;
 	Identifier lhs;
 	ExpressionTree rhs;
 
+protected:
+	SIMPLE_STATEMENT_TYPE type;
+
 public:
-	SimpleStatement(): Statement(STATEMENT_SIMPLE), type(SIMPLE_STATEMENT_INVALID) {}
+	SimpleStatement(): Statement(STATEMENT_SIMPLE) {}
 	SimpleStatement(const Identifier& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
 	SimpleStatement(const char*&);
 
