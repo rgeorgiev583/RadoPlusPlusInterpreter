@@ -11,7 +11,7 @@
 #include "arithmetic.h"
 #include "token.h"
 #include "operator.h"
-#include "lambda.h"
+#include "object.h"
 #include "integer.h"
 #include "string.h"
 #include "identifier.h"
@@ -96,8 +96,8 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 			rstack.push(ExpressionTree(new Integer(expr)));
 		else if (*expr == '"')
 			rstack.push(ExpressionTree(new String(expr)));
-		else if (*expr == '\\')
-			rstack.push(ExpressionTree(new Lambda(expr)));
+		else if (*expr == '{')
+			rstack.push(ExpressionTree(new Object(expr)));
 		else if (*expr >= 'A' && *expr <= 'Z' || *expr >= 'a' && *expr <= 'z')
 		{
 			const char* name = expr;
