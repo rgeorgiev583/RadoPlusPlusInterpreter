@@ -16,6 +16,7 @@
 #include "strtok.h"
 #include "call.h"
 #include "environment.h"
+#include "value.h"
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -76,13 +77,13 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 		switch (((Value*) (*it))->getValueType())
 		{
 		case VALUE_IDENTIFIER:
-			return environment[*((Identifier*) (*it))];
+			return environment[*((Identifier*) (*it))]->clone();
 
 		case VALUE_CALL:
 			return ((Call*) (*it))->execute(environment);
 
 		default:
-			return (Value*) *it;
+			return ((Value*) *it)->clone();
 		}
 		break;
 
@@ -101,7 +102,7 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 					case '*': return new Integer(lhs_val * rhs_val);
 					case '/': return new Integer(lhs_val / rhs_val);
 					case '^': return new Integer(ipow(lhs_val, rhs_val));
-					default:  return 0;
+					default:  return NULL;
 				}
 			}
 			else if (lhs->getValueType() == VALUE_STRING && rhs->getValueType() == VALUE_STRING)
@@ -109,6 +110,9 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 				std::string lhs_val = ((String*) lhs)->getString(), rhs_val = ((String*) rhs)->getString();
 				return ((Operator*) (*it))->getOperator() == '+' ? new String(lhs_val + rhs_val) : new String();
 			}
+
+			delete lhs;
+			delete rhs;
 		}
 		break;
 
