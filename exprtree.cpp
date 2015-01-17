@@ -6,7 +6,6 @@
  */
 
 #include "exprtree.h"
-#include "lstack.cpp"
 #include "arithmetic.h"
 #include "token.h"
 #include "operator.h"
@@ -21,6 +20,7 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include <stack>
 
 
 void ExpressionTreeNode::copy(const ExpressionTreeNode& other)
@@ -57,10 +57,13 @@ ExpressionTreeNode::~ExpressionTreeNode()
 }
 
 
-void ExpressionTree::createTree(LinkedStack<ExpressionTree>& rstack, char op)
+void ExpressionTree::createTree(std::stack<ExpressionTree>& rstack, char op)
 {
-	ExpressionTree rtree = rstack.pop();
-	ExpressionTree ltree = rstack.pop();
+	ExpressionTree rtree = rstack.top();
+	rstack.pop();
+	ExpressionTree ltree = rstack.top();
+	rstack.pop();
+
 	rstack.push(ExpressionTree(new Operator(op), ltree, rtree));
 }
 
@@ -117,8 +120,8 @@ Value* ExpressionTree::evaluateExpression(ExpressionTreeConstIterator it, Enviro
 
 ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 {
-	LinkedStack<char> opstack;
-	LinkedStack<ExpressionTree> rstack;
+	std::stack<char> opstack;
+	std::stack<ExpressionTree> rstack;
 
 	if (!expr)
 		return ExpressionTree();
@@ -145,11 +148,14 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 				opstack.push(*expr);
 			else if (*expr == ')')
 			{
-				char op = opstack.pop();
+				char op = opstack.top();
+				opstack.pop();
 
-				while (op != '(') {
+				while (op != '(')
+				{
 					createTree(rstack, op);
-					op = opstack.pop();
+					op = opstack.top();
+					opstack.pop();
 				}
 			}
 			else if (*expr != ' ' && *expr != '\t' && *expr != '\n' && *expr != '\r')
@@ -157,10 +163,11 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 				// *expr е операция
 				// първо: вадим всички операции
 				// с по-висок или равен приоритет
-				while (!opstack.empty() &&
-					   priority(opstack.last()) >=
-					   priority(*expr))
-					createTree(rstack, opstack.pop());
+				while (!opstack.empty() && priority(opstack.top()) >= priority(*expr))
+				{
+					createTree(rstack, opstack.top());
+					opstack.pop();
+				}
 
 				opstack.push(*expr);
 			}
@@ -170,9 +177,12 @@ ExpressionTree ExpressionTree::createExpressionTree(const char*& expr)
 	}
 
 	while (!opstack.empty())
-		createTree(rstack, opstack.pop());
+	{
+		createTree(rstack, opstack.top());
+		opstack.pop();
+	}
 
-	return rstack.pop();
+	return rstack.top();
 }
 
 void ExpressionTree::deleteNode(ExpressionTreeNode* node)

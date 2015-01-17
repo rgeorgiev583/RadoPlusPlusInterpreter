@@ -8,12 +8,12 @@
 #ifndef EXPRTREE_H_
 #define EXPRTREE_H_
 
-#include "lstack.cpp"
 #include "token.h"
 #include "value.h"
 #include "identifier.h"
 #include "environment.h"
 #include <map>
+#include <stack>
 
 
 struct ExpressionTreeNode
@@ -62,15 +62,13 @@ public:
 
 class ExpressionTree
 {
-
-	static void createTree(LinkedStack<ExpressionTree>&, char);
+	static void createTree(std::stack<ExpressionTree>&, char);
 	static Value* evaluateExpression(ExpressionTreeConstIterator, Environment&);
 
 	ExpressionTreeNode* root;
 
 	void deleteNode(ExpressionTreeNode* node);
 	ExpressionTreeNode* copyNode(ExpressionTreeNode* src);
-
 
 	void adopt(ExpressionTreeNode*& newNode, ExpressionTreeNode*& oldNode) { newNode = oldNode; oldNode = NULL; }
 	void adoptLeft(ExpressionTreeNode*& node) { adopt(root->left, node); }
@@ -89,7 +87,7 @@ public:
 	ExpressionTreeIterator getIterator() { return ExpressionTreeIterator(root); }
 	ExpressionTreeConstIterator getConstIterator() const { return ExpressionTreeConstIterator(root); }
 
-	Value* evaluate(Environment& environment) const { return evaluateExpression(getIterator(), environment); }
+	Value* evaluate(Environment& environment) const { return evaluateExpression(getConstIterator(), environment); }
 };
 
 
