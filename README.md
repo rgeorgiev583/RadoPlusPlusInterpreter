@@ -28,11 +28,12 @@ An interpreter for an object-oriented programming language; this is my course pr
 	<quoted-string> ::= '"' <string> '"'
 	<string> ::= <ascii-character>*
 	<ascii-character> ::= [\x00-\x7F]
-	<lambda> ::= '\' <identifier-tuple> <statement>
+	<object> ::= '{' <kv-tuple>* '}'
 	<call> ::= <identifier> <expression-tuple>
-	<separated-identifier> ::= <identifier> ','*
 	<separated-expression> ::= <expression> ','*
-	<identifier-tuple> ::= '(' <identifier> | <separated-identifier>* ')'
+	<kv-pair> ::= <identifier> ':' <value>
+	<separated-kv-pair> ::= <kv-pair> ','*
+	<kv-tuple> ::= '(' <kv-pair> | <separated-kv-pairs>* ')'
 	<expression-tuple> ::= '(' <expression> | <separated-expression>* ')'
 	<return> ::= 'return ' <expression>
 	<output> ::= 'print ' <expression>
@@ -60,8 +61,6 @@ An interpreter for an object-oriented programming language; this is my course pr
 * `<integer>` - `integer.{h,cpp}::Integer`: an integer (with an optional minus sign)
 * `<quoted-string>` - a string surrounded by quotes (`"`); when parsed the quotes are removed
 * `<string>` - `string.{h,cpp}::String`: only ASCII characters are permitted (no Unicode support)
-* `<lambda>` - `lambda.{h,cpp}::Lambda`: a lambda expression (an anonymous function that otherwise behaves like a normal function
-   (i.e. has parameters, body, etc.) except that it has no name and can be assigned to variables (expression-like)
 * `<call>` - `call.{h,cpp}::Call`: a function call (obviously, to a lambda): accepts arguments (which are actually expressions)
 * `<separated-identifier>` - identifier followed by a comma
 * `<separated-expression>` - expression followed by a comma
