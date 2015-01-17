@@ -30,7 +30,7 @@ class SimpleStatement: public Statement
 	ExpressionTree rhs;
 
 public:
-	SimpleStatement(): Statement(STATEMENT_SIMPLE) {}
+	SimpleStatement(): Statement(STATEMENT_SIMPLE), type(SIMPLE_STATEMENT_INVALID) {}
 	SimpleStatement(const Identifier& _lhs, const ExpressionTree& _rhs): Statement(STATEMENT_SIMPLE), lhs(_lhs), rhs(_rhs) {}
 	SimpleStatement(const char*&);
 
