@@ -23,7 +23,7 @@ FunctionCall::FunctionCall(const char*& code)
 
 Value* FunctionCall::execute(Environment& environment) const
 {
-	EnvironmentIterator eit = environment.find(name);
+	Environment::iterator eit = environment.find(name);
 	Lambda* lambda = NULL;
 
 	if (eit != environment.end())

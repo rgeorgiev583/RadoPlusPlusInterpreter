@@ -23,7 +23,7 @@ ConstructorCall::ConstructorCall(const char*& code)
 
 Value* ConstructorCall::execute(Environment& environment) const
 {
-	EnvironmentIterator eit = environment.find(name);
+	Environment::iterator eit = environment.find(name);
 	Object* object = NULL;
 
 	if (eit != environment.end())
